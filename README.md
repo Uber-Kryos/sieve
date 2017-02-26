@@ -8,4 +8,4 @@ So all in all everything is a work in progress, including the output format.
 Just the presieve is multithreaded, sorry. No plans to make this properly multithreaded.
 
 ###segmented.c
-Nothing yet.
+Nothing yet. Will be a segmented sieve soon, hopefully.
