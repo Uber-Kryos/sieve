@@ -73,7 +73,6 @@ int main(int argc, char * argv[]) {
    return EXIT_SUCCESS;
 }
 
-//TODO add multithreading somehow
 void primeFinder (unsigned char list[], unsigned long long length) {
 
    //start at 7 due to presieve
