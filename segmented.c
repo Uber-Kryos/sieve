@@ -3,7 +3,7 @@
 * Sieve of Eratosthenes, segmented
 *
 * Killian Kinsella <kkinsella15@gmail.com>
-* Date started: 29/04/2016
+* Date started: 26/02/2017
 *
 * Uses 2,3,5 wheel, bitmaps, multithreaded presieving
 *
