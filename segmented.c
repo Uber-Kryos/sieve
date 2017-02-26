@@ -1,11 +1,9 @@
 /***
 *
-* Sieve of Eratosthenes
+* Sieve of Eratosthenes, segmented
 *
 * Killian Kinsella <kkinsella15@gmail.com>
 * Date started: 29/04/2016
-*
-* i7-6700k @ 4.00Ghz -> 30s for size 10 billion
 *
 * Uses 2,3,5 wheel, bitmaps, multithreaded presieving
 *
