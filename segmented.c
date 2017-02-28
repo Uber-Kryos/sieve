@@ -15,6 +15,7 @@
 
 #define NUM_B 8
 #define DEFAULT_SIZE 1000000000
+#define CACHE_SIZE 131075 //Bytes
 
 //for sending multiple arguments to a pthread
 typedef struct _arg_struct {
@@ -126,13 +127,27 @@ void assignPos (unsigned char list[], unsigned long long pos){
 
 void listPrinter(unsigned char list[], unsigned long long length) {
 
-
+/*
    FILE *prime = fopen("test.txt","w");
 
    fwrite(list, NUM_B/8, length, prime);
 
    fclose(prime);
+*/
 
+   unsigned long long i = 0;
+   unsigned char n = 0;
+   unsigned long long count = 0;
+
+   while (i < length) {
+      n = ~list[i];
+      while (n) {
+         n &= (n-1);
+         count++;
+      }
+      i++;
+   }
+   printf("\n %llu Primes Counted\n", count);
 
 }
 
