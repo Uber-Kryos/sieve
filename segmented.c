@@ -19,10 +19,10 @@
 
 //for sending multiple arguments to a pthread
 typedef struct _arg_struct {
-   unsigned long long arg0;
-   unsigned char * arg1;
-   unsigned char arg2;
-   unsigned char arg3;
+   unsigned long long length;
+   unsigned char * list;
+   unsigned char start;
+   unsigned char bitValue;
 } *args;
 
 void primeFinder (unsigned char list[], unsigned long long length);
@@ -38,19 +38,14 @@ int main(int argc, char * argv[]) {
 
    unsigned long long size = DEFAULT_SIZE;
 
-   if (argc > 1){
-      if (sscanf(argv[1], "%llu", &size) != 1){
-         printf("No arguments given, default %llu used.\n", size);
-         size = DEFAULT_SIZE;
-      }
-   } else {
+   if (argc <= 1 || sscanf(argv[1], "%llu", &size) != 1){
       printf("No arguments given, default %llu used.\n", size);
-      size = DEFAULT_SIZE;
    }
 
    //make it divisible by number of bits
-   if (size%NUM_B) {
-      size += (NUM_B-size%NUM_B);
+   int off = size%NUM_B;
+   if (off) {
+      size += (NUM_B-off);
    }
 
    unsigned char *list = (unsigned char*)malloc((size/NUM_B) * sizeof(unsigned char));
@@ -119,8 +114,6 @@ void primeFinder (unsigned char list[], unsigned long long length) {
 void assignPos (unsigned char list[], unsigned long long pos){
 
    unsigned char power = 1;
-
-   //int internalPos = ((NUM_B-1)-pos%NUM_B);
    int internalPos = (~pos)&7;
    list[pos/NUM_B] = list[pos/NUM_B] | (power << internalPos);
 }
@@ -147,14 +140,13 @@ void listPrinter(unsigned char list[], unsigned long long length) {
       }
       i++;
    }
-   printf("\n %llu Primes Counted\n", count);
+   printf("\n%llu Primes Counted\n", count);
 
 }
 
 unsigned char primePos (unsigned char list[], unsigned long long pos){
 
    unsigned char toFind = list[pos/NUM_B];
-   //int internalPos = ((NUM_B-1)-pos%NUM_B);
    int internalPos = (~pos)&7;
    return ((toFind >> internalPos) & 1);
 }
@@ -170,41 +162,40 @@ void preProcess (unsigned char list[], unsigned long long length) {
 
    for(x=0;x<15;x++) i[x] = malloc(sizeof(struct _arg_struct));
 
-   for (x=0;x<15;x++) i[x]->arg0 = length;
+   for (x=0;x<15;x++) i[x]->length = length;
    
-   for (x=0;x<15;x++) i[x]->arg1 = list;
+   for (x=0;x<15;x++) i[x]->list = list;
 
-
-   i[0]->arg2 = 1;
-   i[0]->arg3 = 215;
-   i[1]->arg2 = 2;
-   i[1]->arg3 = 93;
-   i[2]->arg2 = 3;
-   i[2]->arg3 = 245;
-   i[3]->arg2 = 4;
-   i[3]->arg3 = 247;
-   i[4]->arg2 = 5;
-   i[4]->arg3 = 93;
-   i[5]->arg2 = 6;
-   i[5]->arg3 = 119;
-   i[6]->arg2 = 7;
-   i[6]->arg3 = 215;
-   i[7]->arg2 = 8;
-   i[7]->arg3 = 221;
-   i[8]->arg2 = 9;
-   i[8]->arg3 = 117;
-   i[9]->arg2 = 10;
-   i[9]->arg3 = 223;
-   i[10]->arg2 = 11;
-   i[10]->arg3 = 95;
-   i[11]->arg2 = 12;
-   i[11]->arg3 = 117;
-   i[12]->arg2 = 13;
-   i[12]->arg3 = 215;
-   i[13]->arg2 = 14;
-   i[13]->arg3 = 125;
-   i[14]->arg2 = 15;
-   i[14]->arg3 = 125;
+   i[0]->start = 1;
+   i[0]->bitValue = 215;
+   i[1]->start = 2;
+   i[1]->bitValue = 93;
+   i[2]->start = 3;
+   i[2]->bitValue = 245;
+   i[3]->start = 4;
+   i[3]->bitValue = 247;
+   i[4]->start = 5;
+   i[4]->bitValue = 93;
+   i[5]->start = 6;
+   i[5]->bitValue = 119;
+   i[6]->start = 7;
+   i[6]->bitValue = 215;
+   i[7]->start = 8;
+   i[7]->bitValue = 221;
+   i[8]->start = 9;
+   i[8]->bitValue = 117;
+   i[9]->start = 10;
+   i[9]->bitValue = 223;
+   i[10]->start = 11;
+   i[10]->bitValue = 95;
+   i[11]->start = 12;
+   i[11]->bitValue = 117;
+   i[12]->start = 13;
+   i[12]->bitValue = 215;
+   i[13]->start = 14;
+   i[13]->bitValue = 125;
+   i[14]->start = 15;
+   i[14]->bitValue = 125;
 
    pthread_t tid[15];
    
@@ -221,10 +212,10 @@ void *preS (void* argu){
 
    args argument = (args) argu;
 
-   unsigned long long i = argument->arg2;
-   unsigned long long size = argument->arg0;
-   unsigned char *list = argument->arg1;
-   unsigned char bMap = argument->arg3;
+   unsigned long long i = argument->start;
+   unsigned long long size = argument->length;
+   unsigned char *list = argument->list;
+   unsigned char bMap = argument->bitValue;
 
    while (i<size){
 
