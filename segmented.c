@@ -30,6 +30,7 @@ void assignPos (unsigned char list[], unsigned long long pos);
 void listPrinter (unsigned char list[], unsigned long long length);
 void preProcess (unsigned char list[], unsigned long long length);
 
+unsigned long long stLoc (unsigned long long st, unsigned long long mul);
 unsigned char primePos (unsigned char list[], unsigned long long pos);
 
 void *preS (void* argu);
@@ -128,6 +129,7 @@ void listPrinter(unsigned char list[], unsigned long long length) {
    fclose(prime);
 */
 
+   //counts number of bits flipped
    unsigned long long i = 0;
    unsigned char n = 0;
    unsigned long long count = 0;
@@ -149,6 +151,15 @@ unsigned char primePos (unsigned char list[], unsigned long long pos){
    unsigned char toFind = list[pos/NUM_B];
    int internalPos = (~pos)&7;
    return ((toFind >> internalPos) & 1);
+}
+
+unsigned long long stLoc (unsigned long long st, unsigned long long mul){
+
+   //returns first location > st that is a multiple of mul
+   unsigned long long offset = st%mul;
+   unsigned long long square = mul*mul;
+   if (square > st) return square;
+   return ((offset)?(st+(mul - offset)):st);
 }
 
 //The values for the bitmap where multiples of 2,3,5 have been flipped
