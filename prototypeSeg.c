@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-#define START 9537
+#define LIMIT 1000000000
 #define CACHE_SIZE 1048576
 
 void primeFinder (unsigned char list[], unsigned long long start);
@@ -15,6 +15,14 @@ unsigned long long stLoc (unsigned long long st, unsigned long long mul);
 int main(int argc, char * argv[]) {
 
    unsigned long long size = CACHE_SIZE;
+   unsigned long long limit = LIMIT;
+
+   if (argc <= 1 || sscanf(argv[1], "%llu", &limit) != 1){
+      printf("No arguments given, default %llu used.\n", limit);
+   }
+
+   limit /= CACHE_SIZE;
+   limit++;
 
    unsigned char *list = (unsigned char*)malloc((size/8) * sizeof(unsigned char));
    //checks if malloc worked
@@ -26,7 +34,7 @@ int main(int argc, char * argv[]) {
    unsigned long long i = 0;
    unsigned long long total = 0;
 
-   while (i<START){
+   while (i<limit){
       preProcess(list, i);
 
       primeFinder(list, i);
