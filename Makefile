@@ -7,3 +7,6 @@ sieve_seg: segmented.c
 
 sieve_mt: multiThread.c
 	$(CC) $(CFLAGS) -o sieve_mt multiThread.c $(LIBS)
+
+sieve_proto: prototypeSeg.c
+	$(CC) $(CFLAGS) -o sieve_proto prototypeSeg.c $(LIBS)
