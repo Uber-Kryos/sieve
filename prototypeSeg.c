@@ -3,7 +3,7 @@
 #include <math.h>
 
 #define LIMIT 1000000000
-#define CACHE_SIZE 1048576
+#define CACHE_SIZE 1048584
 
 void primeFinder (unsigned char list[], unsigned long long start);
 void assignPos (unsigned char list[], unsigned long long pos);
@@ -129,31 +129,20 @@ void preProcess (unsigned char list[], unsigned long long start) {
    unsigned long long i = 0;
    unsigned long long length = CACHE_SIZE >> 3;
    
+   unsigned char preVal[3];
    unsigned char j = 0;
-
-   unsigned char preVal[3] = {215,93,117};
 
    if(start){
 
-      switch(start%3){
-
-         case 1:
-            preVal[0] = 93;
-            preVal[1] = 117;
-            preVal[2] = 215;
-            break;
-
-         case 2:
-            break;
-         case 0:
-            preVal[0] = 117;
-            preVal[1] = 215;
-            preVal[2] = 93;
-            break;
-      }
+      preVal[0] = 117;
+      preVal[1] = 215;
+      preVal[2] = 93;
 
    } else {
 
+      preVal[0] = 215;
+      preVal[1] = 93;
+      preVal[2] = 117;
       list[i] = 149;
       i++;
    }
@@ -173,6 +162,4 @@ void preProcess (unsigned char list[], unsigned long long start) {
          }
       }
    }
-   
-
 }
