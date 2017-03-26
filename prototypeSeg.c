@@ -1,9 +1,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <pthread.h>
 
 #define LIMIT 1000000000
-#define CACHE_SIZE 1048584
+//24*x < 2097152
+#define CACHE_SIZE 1920000
+
+typedef struct _arg_struct {
+   unsigned char * list;
+   unsigned char start;
+   unsigned char bitValue;
+} *args;
+
 
 void primeFinder (unsigned char list[], unsigned long long start);
 void assignPos (unsigned char list[], unsigned long long pos);
@@ -11,6 +20,8 @@ void preProcess (unsigned char list[], unsigned long long start);
 unsigned char primePos (unsigned char list[], unsigned long long pos);
 unsigned long long listPrinter (unsigned char list[]);
 unsigned long long stLoc (unsigned long long st, unsigned long long mul);
+
+void *preS (void* argu);
 
 int main(int argc, char * argv[]) {
 
@@ -126,40 +137,60 @@ unsigned char primePos (unsigned char list[], unsigned long long pos){
 
 void preProcess (unsigned char list[], unsigned long long start) {
 
-   unsigned long long i = 0;
-   unsigned long long length = CACHE_SIZE >> 3;
-   
-   unsigned char preVal[3];
-   unsigned char j = 0;
+   list[0] = 149;
 
-   if(start){
+   int x;
 
-      preVal[0] = 117;
-      preVal[1] = 215;
-      preVal[2] = 93;
+   args i[3];
+
+   for(x=0;x<3;x++){
+
+      i[x] = malloc(sizeof(struct _arg_struct));
+      i[x]->list = list;
+   }
+   if (start){
+
+      i[0]->start = 0;
+      i[0]->bitValue = 117;
+      i[1]->start = 1;
+      i[1]->bitValue = 215;
+      i[2]->start = 2;
+      i[2]->bitValue = 93;
 
    } else {
 
-      preVal[0] = 215;
-      preVal[1] = 93;
-      preVal[2] = 117;
-      list[i] = 149;
-      i++;
+      i[0]->start = 1;
+      i[0]->bitValue = 215;
+      i[1]->start = 2;
+      i[1]->bitValue = 93;
+      i[2]->start = 3;
+      i[2]->bitValue = 117;
+
    }
 
-   while (i < length) {
-      list[i] = preVal[j];
-      i++;
-      j++;
-      if (i < length) {
-         list[i] = preVal[j];
-         i++;
-         j++;
-         if (i < length) {
-            list[i] = preVal[j];
-            i++;
-            j=0;
-         }
-      }
+   pthread_t tid[3];
+   
+   for (x=0;x<3;x++) pthread_create(&tid[x], NULL, preS, (void*)i[x]);
+
+   for (x=0;x<3;x++) pthread_join(tid[x],NULL);
+
+   for (x=0; x<3; x++) free(i[x]);
+
+}
+
+void *preS (void* argu){
+
+   args argument = (args) argu;
+
+   unsigned long long length = CACHE_SIZE / 8;
+   unsigned long long i = argument->start;
+   unsigned char *list = argument->list;
+   unsigned char bMap = argument->bitValue;
+
+   while (i < length){
+
+      list[i] = bMap;
+      i+=3;
    }
+   pthread_exit((void*)NULL);
 }
