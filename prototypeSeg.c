@@ -106,25 +106,22 @@ void assignPos (unsigned char list[], unsigned long long pos){
 
 unsigned long long listPrinter(unsigned char list[]) {
 
-   //unsigned char n = 0;
-   //unsigned long long i = 0;
-   unsigned long long count[4] = {0};
+   unsigned long long count = 0;
    
-   #pragma omp parallel num_threads(4)
+   #pragma omp parallel num_threads(4) reduction(+:count)
    {
-   unsigned long long i = omp_get_thread_num();
-  // unsigned char n = 0;
+      unsigned long long i = omp_get_thread_num();
 
-   while (i < LENGTH) {
-      unsigned char n = ~list[i];
-      while (n) {
-         n &= (n-1);
-         count[i&3]++;
+      while (i < LENGTH) {
+         unsigned char n = ~list[i];
+         while (n) {
+            n &= (n-1);
+            count++;
+         }
+         i+=4;
       }
-      i+=4;
    }
-   }
-   return count[0]+count[1]+count[2]+count[3];
+   return count;
 }
 
 unsigned char primePos (unsigned char list[], unsigned long long pos){
@@ -135,11 +132,11 @@ unsigned char primePos (unsigned char list[], unsigned long long pos){
 
 void preProcess (unsigned char list[], unsigned long long start) {
 
-   unsigned long long i = 0;
-   unsigned long long length = LENGTH;
+   register unsigned long long i = 0;//
+   register unsigned long long length = LENGTH;//
    
    unsigned char preVal[3];
-   unsigned char j = 0;
+   unsigned char j = 0;//
 
    if(start){
 
@@ -152,8 +149,8 @@ void preProcess (unsigned char list[], unsigned long long start) {
       preVal[0] = 215;
       preVal[1] = 93;
       preVal[2] = 117;
-      list[i] = 149;
-      i++;
+      list[0] = 149;
+      i++;//
    }
 
    while (i < length) {
@@ -171,4 +168,14 @@ void preProcess (unsigned char list[], unsigned long long start) {
          }
       }
    }
+   /*
+   #pragma omp parallel num_threads(3)
+   {
+      unsigned int j = omp_get_thread_num();
+      unsigned long long i = j+(!start);
+      while (i < LENGTH){
+         list[i] = preVal[j];
+         i+=3;
+      }
+   }*/
 }
