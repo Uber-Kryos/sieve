@@ -9,6 +9,7 @@
 #define CACHE_SIZE 1920000
 //CACHE_SIZE / 8
 #define LENGTH 240000
+#define THREAD_COUNT 4
 
 void primeFinder (unsigned char list[], unsigned long long start);
 void assignPos (unsigned char list[], unsigned long long pos);
@@ -28,30 +29,36 @@ int main(int argc, char * argv[]) {
 
    limit /= CACHE_SIZE;
    limit++;
-
-   unsigned char *list = (unsigned char*)malloc((size/8) * sizeof(unsigned char));
-   //checks if malloc worked
-   if (list == NULL) {
-       printf("malloc didn't work\n");
-       exit(EXIT_FAILURE);
+   unsigned char num;
+   unsigned char *list[THREAD_COUNT];
+   for(num = 0; num < THREAD_COUNT; num++){
+      list[num] = (unsigned char*)malloc((size/8) * sizeof(unsigned char));
+      if (list[num] == NULL) {
+         printf("malloc didn't work\n");
+         exit(EXIT_FAILURE);
+      }
    }
+  
 
-   unsigned long long i = 0;
    unsigned long long total = 0;
 
-   while (i<limit){
-      preProcess(list, i);
+   #pragma omp parallel num_threads(THREAD_COUNT) reduction(+:total)
+   {
+      unsigned long long i = omp_get_thread_num();
+      unsigned char j = i;
+      while (i<limit){
+         preProcess(list[j], i);
 
-      primeFinder(list, i);
+         primeFinder(list[j], i);
 
-      total += listPrinter(list);
-      i++;
+         total += listPrinter(list[j]);
+         i+=THREAD_COUNT;
+      }
    }
 
    printf("%llu\n",total);
 
-   free(list);
-
+   for (num = 0; num < THREAD_COUNT; num++) free(list[num]);
    return EXIT_SUCCESS;
 }
 
@@ -107,20 +114,35 @@ void assignPos (unsigned char list[], unsigned long long pos){
 unsigned long long listPrinter(unsigned char list[]) {
 
    unsigned long long count = 0;
-   
-   #pragma omp parallel num_threads(4) reduction(+:count)
-   {
-      unsigned long long i = omp_get_thread_num();
+   unsigned long long i = 0;
+   unsigned int n = 0;
 
-      while (i < LENGTH) {
-         unsigned char n = ~list[i];
+   //hamming weight code from wikipedia
+   while (i < (LENGTH>>2)) {
+      n = ~((unsigned int *)list)[i];
+
+      n -= (n >> 1) & 0x55555555;
+      n = (n & 0x33333333) + ((n >> 2) & 0x33333333); 
+      n = (n + (n >> 4)) & 0x0f0f0f0f;
+      count += ((n*0x01010101)>>24);
+      i++;
+   }
+
+
+   /* //different Hamming weight code (might be better) 
+   {
+      //unsigned long long i =0;
+
+      while (i < (LENGTH>>2)) {
+         unsigned int n = ~((unsigned int *)list)[i];
          while (n) {
             n &= (n-1);
             count++;
          }
-         i+=4;
+         i++;
       }
-   }
+   }*/
+
    return count;
 }
 
@@ -132,11 +154,11 @@ unsigned char primePos (unsigned char list[], unsigned long long pos){
 
 void preProcess (unsigned char list[], unsigned long long start) {
 
-   register unsigned long long i = 0;//
-   register unsigned long long length = LENGTH;//
+   register unsigned long long i = 0;
+   register unsigned long long length = LENGTH;
    
    unsigned char preVal[3];
-   unsigned char j = 0;//
+   unsigned char j = 0;
 
    if(start){
 
@@ -150,7 +172,7 @@ void preProcess (unsigned char list[], unsigned long long start) {
       preVal[1] = 93;
       preVal[2] = 117;
       list[0] = 149;
-      i++;//
+      i++;
    }
 
    while (i < length) {
@@ -168,14 +190,4 @@ void preProcess (unsigned char list[], unsigned long long start) {
          }
       }
    }
-   /*
-   #pragma omp parallel num_threads(3)
-   {
-      unsigned int j = omp_get_thread_num();
-      unsigned long long i = j+(!start);
-      while (i < LENGTH){
-         list[i] = preVal[j];
-         i+=3;
-      }
-   }*/
 }
