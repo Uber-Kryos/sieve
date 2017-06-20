@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -Wall -Werror -O3
-LIBS = -lm
+LIBS = -lm #-msse4.2
 
 sieve_proto: prototypeSeg.c
 	$(CC) $(CFLAGS) -o sieve_proto prototypeSeg.c -fopenmp $(LIBS)
