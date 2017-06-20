@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-//#include <pthread.h>
+//#include <nmmintrin.h>
 #include <omp.h>
 
 #define LIMIT 1000000000
@@ -120,6 +120,8 @@ unsigned long long listPrinter(unsigned char list[]) {
    //hamming weight code from wikipedia
    while (i < (LENGTH>>2)) {
       n = ~((unsigned int *)list)[i];
+
+      //count += _mm_popcnt_u32(n);
 
       n -= (n >> 1) & 0x55555555;
       n = (n & 0x33333333) + ((n >> 2) & 0x33333333); 
