@@ -5,11 +5,13 @@
 #include <omp.h>
 
 #define LIMIT 1000000000
-//24*x < 2097152
-#define CACHE_SIZE 1920000
+//24*x < 2097152 need to be 24 (3*8) due to 3 vals in preVal
+//24*x < 262144
+#define CACHE_SIZE 1920000 
+//1920000
 //CACHE_SIZE / 8
-#define LENGTH 240000
-#define THREAD_COUNT 4
+#define LENGTH (CACHE_SIZE / 8)
+#define THREAD_COUNT 32
 
 void primeFinder (unsigned char list[], unsigned long long start);
 void assignPos (unsigned char list[], unsigned long long pos);
@@ -29,6 +31,7 @@ int main(int argc, char * argv[]) {
 
    limit /= CACHE_SIZE;
    limit++;
+   printf("%llu\n",limit*CACHE_SIZE);
    unsigned char num;
    unsigned char *list[THREAD_COUNT];
    for(num = 0; num < THREAD_COUNT; num++){
@@ -74,14 +77,15 @@ void primeFinder (unsigned char list[], unsigned long long start) {
 
    //needed due to presieve (stLoc can return a value out of phase)
    i += (i&1)?startValue:0;
-
+   unsigned char *listPointerLoc; 
    while (startValue < lenCalc) {
       //plus 1 as arrays start at 0
       j = i;
-        
+      listPointerLoc = list + (j>>3);
       while (j < CACHE_SIZE) {
-         assignPos(list, j);
+         assignPos(listPointerLoc, j);
          j += startValue*2;
+         listPointerLoc = list + (j>>3);
       }
 
       //this skips the even numbers
@@ -108,7 +112,7 @@ void assignPos (unsigned char list[], unsigned long long pos){
    //I bitshift below to increase preformance
    int internalPos = (~pos)&7;
    //incase it wasn't noticed, /8 as each char holds 8 bits
-   list[pos/8] = list[pos/8] | (power << internalPos);
+   *list |= (power << internalPos);
 }
 
 unsigned long long listPrinter(unsigned char list[]) {
@@ -120,13 +124,13 @@ unsigned long long listPrinter(unsigned char list[]) {
    //hamming weight code from wikipedia
    while (i < (LENGTH>>2)) {
       n = ~((unsigned int *)list)[i];
-
+      count += __builtin_popcount(n);
       //count += _mm_popcnt_u32(n);
 
-      n -= (n >> 1) & 0x55555555;
-      n = (n & 0x33333333) + ((n >> 2) & 0x33333333); 
-      n = (n + (n >> 4)) & 0x0f0f0f0f;
-      count += ((n*0x01010101)>>24);
+      /* n -= (n >> 1) & 0x55555555; */
+      /* n = (n & 0x33333333) + ((n >> 2) & 0x33333333); */ 
+      /* n = (n + (n >> 4)) & 0x0f0f0f0f; */
+      /* count += ((n*0x01010101)>>24); */
       i++;
    }
 
