@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <math.h>
 //#include <nmmintrin.h>
 #include <omp.h>
@@ -22,7 +23,6 @@ unsigned long long stLoc (unsigned long long st, unsigned long long mul);
 
 int main(int argc, char * argv[]) {
 
-   unsigned long long size = CACHE_SIZE;
    unsigned long long limit = LIMIT;
 
    if (argc <= 1 || sscanf(argv[1], "%llu", &limit) != 1){
@@ -32,16 +32,10 @@ int main(int argc, char * argv[]) {
    limit /= CACHE_SIZE;
    limit++;
    printf("%llu\n",limit*CACHE_SIZE);
-   unsigned char num;
-   unsigned char *list[THREAD_COUNT];
-   for(num = 0; num < THREAD_COUNT; num++){
-      list[num] = (unsigned char*)malloc((size/8) * sizeof(unsigned char));
-      if (list[num] == NULL) {
-         printf("malloc didn't work\n");
-         exit(EXIT_FAILURE);
-      }
-   }
-  
+   unsigned char list[THREAD_COUNT][LENGTH];
+   
+   static unsigned char preList[LENGTH];
+   preProcess(preList,1);
 
    unsigned long long total = 0;
 
@@ -49,9 +43,14 @@ int main(int argc, char * argv[]) {
    {
       unsigned long long i = omp_get_thread_num();
       unsigned char j = i;
+      if (i==0){
+         preProcess(list[j],i);
+         primeFinder(list[j], i);
+         total += listPrinter(list[j]);
+         i+=THREAD_COUNT;
+      }
       while (i<limit){
-         preProcess(list[j], i);
-
+         memcpy(list[j],preList,LENGTH);
          primeFinder(list[j], i);
 
          total += listPrinter(list[j]);
@@ -61,7 +60,6 @@ int main(int argc, char * argv[]) {
 
    printf("%llu\n",total);
 
-   for (num = 0; num < THREAD_COUNT; num++) free(list[num]);
    return EXIT_SUCCESS;
 }
 
@@ -91,6 +89,7 @@ void primeFinder (unsigned char list[], unsigned long long start) {
       //this skips the even numbers
       startValue++;
       startValue++;
+      if (!(startValue%3)) startValue+=2;
 
       i = stLoc(startPos, startValue) - 1;
       i += (i&1)?startValue:0;
@@ -125,7 +124,6 @@ unsigned long long listPrinter(unsigned char list[]) {
    while (i < (LENGTH>>2)) {
       n = ~((unsigned int *)list)[i];
       count += __builtin_popcount(n);
-      //count += _mm_popcnt_u32(n);
 
       /* n -= (n >> 1) & 0x55555555; */
       /* n = (n & 0x33333333) + ((n >> 2) & 0x33333333); */ 
