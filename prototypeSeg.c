@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-//#include <nmmintrin.h>
 #include <omp.h>
 
 #define LIMIT 1000000000
@@ -20,6 +19,7 @@ void preProcess (unsigned char list[], unsigned long long start);
 unsigned char primePos (unsigned char list[], unsigned long long pos);
 unsigned long long listPrinter (unsigned char list[]);
 unsigned long long stLoc (unsigned long long st, unsigned long long mul);
+static unsigned char incList[8] = {2,4,2,4,6,2,6,4}; 
 
 int main(int argc, char * argv[]) {
 
@@ -66,10 +66,11 @@ int main(int argc, char * argv[]) {
 void primeFinder (unsigned char list[], unsigned long long start) {
 
    unsigned long long startPos = (start*CACHE_SIZE);
-   unsigned long long startValue = 5;
+   unsigned long long startValue = 7;
    unsigned long long i = stLoc(startPos, startValue) - 1;
    unsigned long long endPos = startPos+CACHE_SIZE;
    unsigned long long j = 0;
+   unsigned long long count = 7;
 
    double lenCalc = ceil(sqrt(endPos));
 
@@ -85,11 +86,9 @@ void primeFinder (unsigned char list[], unsigned long long start) {
          j += startValue*2;
          listPointerLoc = list + (j>>3);
       }
-
-      //this skips the even numbers
-      startValue++;
-      startValue++;
-      if (!(startValue%3)) startValue+=2;
+      //this increments to the next preprocessed prime
+      startValue += incList[count%8];
+      count++;
 
       i = stLoc(startPos, startValue) - 1;
       i += (i&1)?startValue:0;
@@ -124,29 +123,8 @@ unsigned long long listPrinter(unsigned char list[]) {
    while (i < (LENGTH>>2)) {
       n = ~((unsigned int *)list)[i];
       count += __builtin_popcount(n);
-
-      /* n -= (n >> 1) & 0x55555555; */
-      /* n = (n & 0x33333333) + ((n >> 2) & 0x33333333); */ 
-      /* n = (n + (n >> 4)) & 0x0f0f0f0f; */
-      /* count += ((n*0x01010101)>>24); */
       i++;
    }
-
-
-   /* //different Hamming weight code (might be better) 
-   {
-      //unsigned long long i =0;
-
-      while (i < (LENGTH>>2)) {
-         unsigned int n = ~((unsigned int *)list)[i];
-         while (n) {
-            n &= (n-1);
-            count++;
-         }
-         i++;
-      }
-   }*/
-
    return count;
 }
 
@@ -158,40 +136,16 @@ unsigned char primePos (unsigned char list[], unsigned long long pos){
 
 void preProcess (unsigned char list[], unsigned long long start) {
 
-   register unsigned long long i = 0;
-   register unsigned long long length = LENGTH;
+   unsigned long long i = 0;
+   unsigned char preVal[15] = {125, 215, 93, 245, 247, 93, 119, 215, 221, 117, 223, 95, 117, 215, 125};
    
-   unsigned char preVal[3];
-   unsigned char j = 0;
-
-   if(start){
-
-      preVal[0] = 117;
-      preVal[1] = 215;
-      preVal[2] = 93;
-
-   } else {
-
-      preVal[0] = 215;
-      preVal[1] = 93;
-      preVal[2] = 117;
-      list[0] = 149;
+   if(!start){
+      list[0]    = 149;
       i++;
    }
 
-   while (i < length) {
-      list[i] = preVal[j];
+   while (i<LENGTH){
+      list[i] = preVal[i%15];
       i++;
-      j++;
-      if (i < length) {
-         list[i] = preVal[j];
-         i++;
-         j++;
-         if (i < length) {
-            list[i] = preVal[j];
-            i++;
-            j=0;
-         }
-      }
    }
 }
