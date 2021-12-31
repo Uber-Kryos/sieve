@@ -5,11 +5,11 @@
 #include <omp.h>
 
 #define LIMIT 1000000000
-//24*x < 2097152 need to be 24 (3*8) due to 3 vals in preVal
-//24*x < 262144
+// 24*x < 2097152 need to be 24 (3*8) due to 3 vals in preVal
+// 24*x < 262144
 #define CACHE_SIZE 1920000 
-//1920000
-//CACHE_SIZE / 8
+// 1920000
+// CACHE_SIZE / 8
 #define LENGTH (CACHE_SIZE / 8)
 #define THREAD_COUNT 32
 
@@ -74,11 +74,11 @@ void primeFinder (unsigned char list[], unsigned long long start) {
 
    double lenCalc = ceil(sqrt(endPos));
 
-   //needed due to presieve (stLoc can return a value out of phase)
+   // needed due to presieve (stLoc can return a value out of phase)
    i += (i&1)?startValue:0;
    unsigned char *listPointerLoc; 
    while (startValue < lenCalc) {
-      //plus 1 as arrays start at 0
+      // plus 1 as arrays start at 0
       j = i;
       listPointerLoc = list + (j>>3);
       while (j < CACHE_SIZE) {
@@ -86,7 +86,7 @@ void primeFinder (unsigned char list[], unsigned long long start) {
          j += startValue*2;
          listPointerLoc = list + (j>>3);
       }
-      //this increments to the next preprocessed prime
+      // this increments to the next preprocessed prime
       startValue += incList[count%8];
       count++;
 
@@ -98,7 +98,7 @@ void primeFinder (unsigned char list[], unsigned long long start) {
 
 unsigned long long stLoc (unsigned long long st, unsigned long long mul){
 
-   //returns equivalent array position
+   // returns equivalent array position
    unsigned long long offset = st%mul;
    if (!st) return mul*mul;
    return ((offset)?(mul - offset):0);
@@ -107,9 +107,9 @@ unsigned long long stLoc (unsigned long long st, unsigned long long mul){
 void assignPos (unsigned char list[], unsigned long long pos){
 
    unsigned char power = 1;
-   //I bitshift below to increase preformance
+   // I bitshift below to increase preformance
    int internalPos = (~pos)&7;
-   //incase it wasn't noticed, /8 as each char holds 8 bits
+   // incase it wasn't noticed, /8 as each char holds 8 bits
    *list |= (power << internalPos);
 }
 
@@ -119,7 +119,7 @@ unsigned long long listPrinter(unsigned char list[]) {
    unsigned long long i = 0;
    unsigned int n = 0;
 
-   //hamming weight code from wikipedia
+   // hamming weight code from wikipedia
    while (i < (LENGTH>>2)) {
       n = ~((unsigned int *)list)[i];
       count += __builtin_popcount(n);

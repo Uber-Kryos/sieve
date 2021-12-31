@@ -18,7 +18,7 @@
 #define NUM_B 8
 #define DEFAULT_SIZE 1000000000
 
-//for sending multiple arguments to a pthread
+// for sending multiple arguments to a pthread
 typedef struct _arg_struct {
    unsigned long long length;
    unsigned char * list;
@@ -43,20 +43,20 @@ int main(int argc, char * argv[]) {
       printf("No arguments given, default %llu used.\n", size);
    }
 
-   //make it divisible by number of bits
+   // make it divisible by number of bits
    int off = size%NUM_B;
    if (off) {
       size += (NUM_B-off);
    }
 
    unsigned char *list = (unsigned char*)malloc((size/NUM_B) * sizeof(unsigned char));
-   //checks if alloc worked
+   // checks if alloc worked
    if (list == NULL) {
       printf("alloc didn't work\n");
       exit(EXIT_FAILURE);
    }
 
-   //Hard coded for a 2,3,5 wheel
+   // Hard coded for a 2,3,5 wheel
    preProcess(list, size/NUM_B);
 
    primeFinder(list, size);
@@ -70,7 +70,7 @@ int main(int argc, char * argv[]) {
 
 void primeFinder (unsigned char list[], unsigned long long length) {
 
-   //start at 7 due to presieve
+   // start at 7 due to presieve
    unsigned long long i = 6;
    unsigned long long j = 0;
    unsigned long long adder = 0;
@@ -79,31 +79,31 @@ void primeFinder (unsigned char list[], unsigned long long length) {
 
    int posI = 0;
    int posJ = 0;
-   //Pattern in a 2,3,5 wheel
+   // Pattern in a 2,3,5 wheel
    int gap[8] = {4,2,4,2,4,6,2,6};
 
 
    while (i < lenCalc) {
 
-      //plus 1 as arrays start at 0
+      // plus 1 as arrays start at 0
       adder = i+1;
       j = (adder * adder) - 1;
       if (!primePos(list, i)){
 
-         //for finding position in gaps
+         // for finding position in gaps
          posJ = posI;
          while (j < length) {
 
             assignPos(list, j);
 
-            //multiplied by gap due to Euler
+            // multiplied by gap due to Euler
             j += (adder * gap[posJ]);
             posJ+=1;
             posJ&=7;
          }
       }
 
-      //this increments semi-efficiently
+      // this increments semi-efficiently
       i+=gap[posI];
       posI+=1;
       posI&=7;
@@ -151,7 +151,7 @@ unsigned char primePos (unsigned char list[], unsigned long long pos){
    return ((toFind >> internalPos) & 1);
 }
 
-//The values for the bitmap where multiples of 2,3,5 have been flipped
+// The values for the bitmap where multiples of 2,3,5 have been flipped
 void preProcess (unsigned char list[], unsigned long long length) {
 
    list[0] = 149;
